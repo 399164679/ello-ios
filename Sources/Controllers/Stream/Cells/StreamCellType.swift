@@ -37,7 +37,7 @@ public enum StreamCellType: Equatable {
     case InviteFriends
     case Notification
     case OnboardingHeader(data: (String, String)?)
-    case Placeholder(PlaceholderType)
+    case Placeholder
     case ProfileHeader
     case RepostHeader(height: CGFloat)
     case SeeMoreComments
@@ -83,7 +83,7 @@ public enum StreamCellType: Equatable {
         SeeMoreComments,
         Spacer(height: 0.0),
         FullWidthSpacer(height: 0.0),
-        Placeholder(.CategoryList),
+        Placeholder,
         StreamLoading,
         Text(data: nil),
         Toggle,
@@ -104,46 +104,8 @@ public enum StreamCellType: Equatable {
     }
 
     // this is just stupid...
-    public var identifier: Int {
-        switch self {
-        case CommentHeader: return 0
-        case CreateComment: return 1
-        case Embed: return 2
-        case FollowAll: return 3
-        case Footer: return 4
-        case Header: return 5
-        case Image: return 6
-        case InviteFriends: return 7
-        case Notification: return 8
-        case OnboardingHeader: return 9
-        case ProfileHeader: return 11
-        case let Placeholder(type):
-            switch type {
-            case .CategoryList: return 1001
-            case .PeopleToFollow: return 1002
-            case .ProfileHeader: return 1003
-            case .ProfilePosts: return 1004
-            case .PostHeader: return 1005
-            case .PostLovers: return 1006
-            case .PostReposters: return 1007
-            case .PostComments: return 1008
-            }
-        case RepostHeader: return 12
-        case SeeMoreComments: return 13
-        case Spacer: return 14
-        case FullWidthSpacer: return 15
-        case StreamLoading: return 16
-        case Text: return 17
-        case Toggle: return 18
-        case Unknown: return 19
-        case UserAvatars: return 20
-        case UserListItem: return 21
-        case ColumnToggle: return 22
-        case Category: return 23
-        case CategoryCard: return 24
-        case SeeAllCategories: return 25
-        case CategoryList: return 26
-        }
+    public var identifier: String {
+        return "\(self)"
     }
 
     public var name: String {
@@ -354,7 +316,7 @@ public enum StreamCellType: Equatable {
             CreateComment,
             FollowAll(data: nil),
             Notification,
-            Placeholder(.CategoryList),
+            Placeholder,
             OnboardingHeader(data: nil),
             Spacer(height: 0.0),
             FullWidthSpacer(height: 0.0),
