@@ -15,11 +15,16 @@ public class ElloScreen: UIView {
         navigationBar.items = [navigationItem]
         super.init(frame: UIScreen.mainScreen().bounds)
 
+        style()
         arrange()
     }
 
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    private func style() {
+        backgroundColor = .whiteColor()
     }
 
     private func arrange() {

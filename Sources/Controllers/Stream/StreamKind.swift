@@ -76,8 +76,20 @@ public enum StreamKind {
     }
 
     public var columnCount: Int {
+        return columnCountFor(width: Window.width)
+    }
+
+    public func columnCountFor(width width: CGFloat) -> Int {
+        let gridColumns: Int
+        if Window.isWide(width) {
+            gridColumns = 3
+        }
+        else {
+            gridColumns = 2
+        }
+
         if self.isGridView {
-            return 2
+            return gridColumns
         }
         else {
             return 1

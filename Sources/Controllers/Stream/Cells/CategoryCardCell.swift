@@ -44,6 +44,8 @@ public class CategoryCardCell: UICollectionViewCell {
 
     private func style() {
         label.textColor = .whiteColor()
+        imageView.contentMode = .ScaleAspectFill
+        imageView.clipsToBounds = true
         colorFillView.backgroundColor = .blackColor()
         colorFillView.alpha = 0.5
     }

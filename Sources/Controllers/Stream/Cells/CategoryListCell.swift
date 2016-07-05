@@ -14,7 +14,7 @@ public class CategoryListCell: UICollectionViewCell {
 
     struct Size {
         static let sideMargins: CGFloat = 15
-        static let spacing: CGFloat = 15
+        static let spacing: CGFloat = 9
     }
 
     public typealias CategoryInfo = (title: String, endpoint: ElloAPI, selected: Bool)

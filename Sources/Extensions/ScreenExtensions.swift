@@ -1,11 +1,3 @@
-//
-//  ScreenExtensions.swift
-//  Ello
-//
-//  Created by Sean Dougherty on 12/9/14.
-//  Copyright (c) 2014 Ello. All rights reserved.
-//
-
 extension UIWindow {
     class var mainWindow: UIWindow {
         return UIApplication.sharedApplication().keyWindow ?? UIWindow()
@@ -27,4 +19,12 @@ extension UIWindow {
         return windowSize().height
     }
 
+}
+
+
+public class Window {
+    static public func isWide(width: CGFloat) -> Bool {
+        return width > 1000
+    }
+    static public var width: CGFloat { return UIWindow.mainWindow.frame.size.width }
 }

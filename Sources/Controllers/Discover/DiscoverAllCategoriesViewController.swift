@@ -19,6 +19,7 @@ public class DiscoverAllCategoriesViewController: StreamableViewController {
         elloNavigationItem.leftBarButtonItems = [leftItem]
         elloNavigationItem.fixNavBarItemPadding()
 
+        streamViewController.initialLoadClosure = loadCategories
         streamViewController.streamKind = .AllCategories
     }
 
@@ -30,6 +31,16 @@ public class DiscoverAllCategoriesViewController: StreamableViewController {
         let screen = DiscoverAllCategoriesScreen(navigationItem: elloNavigationItem)
         self.view = screen
         viewContainer = screen.streamContainer
+    }
+
+    func loadCategories() {
+        CategoryService().loadCategories({ [weak self] categories in
+            guard let sself = self else { return }
+
+            let sortedCategories = CategoryList(categories: categories).categories
+
+            sself.streamViewController.showInitialJSONAbles(sortedCategories)
+        })
     }
 
     override public func viewDidLoad() {
@@ -67,11 +78,7 @@ extension DiscoverAllCategoriesViewController {
     override public func streamViewStreamCellItems(jsonables: [JSONAble], defaultGenerator generator: StreamCellItemGenerator) -> [StreamCellItem]? {
         let items: [StreamCellItem]
         if let categories = jsonables as? [Category] {
-            items = categories.sort {
-                return $0.order < $1.order
-                }.map {
-                    return StreamCellItem(jsonable: $0, type: .CategoryCard)
-            }
+            items = categories.map { StreamCellItem(jsonable: $0, type: .CategoryCard) }
         }
         else {
             items = []

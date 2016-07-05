@@ -34,9 +34,7 @@ public class ElloNavigationBar: UINavigationBar {
         self.opaque = true
         self.barTintColor = UIColor.whiteColor()
 
-        let bar = UIView(frame: CGRect(x: 0, y: 0, width: frame.width, height: 20))
-        bar.autoresizingMask = [.FlexibleWidth, .FlexibleBottomMargin]
-        bar.backgroundColor = UIColor.blackColor()
+        let bar = BlackBar(frame: CGRect(x: 0, y: 0, width: frame.width, height: 20))
         addSubview(bar)
     }
 

@@ -169,6 +169,12 @@ public final class StreamViewController: BaseElloViewController {
             self.pullToRefreshView?.defaultContentInset = contentInset
         }
     }
+    public var columnCount: Int {
+        guard let layout = self.collectionView.collectionViewLayout as? StreamCollectionViewLayout else {
+            return 1
+        }
+        return layout.columnCount
+    }
 
     var pullToRefreshEnabled: Bool = true {
         didSet { pullToRefreshView?.hidden = !pullToRefreshEnabled }
@@ -240,8 +246,10 @@ public final class StreamViewController: BaseElloViewController {
     }
 
     public func imageCellHeightUpdated(cell: StreamImageCell) {
-        if let indexPath = collectionView.indexPathForCell(cell) {
-            updateCellHeight(indexPath, height: cell.calculatedHeight)
+        if let indexPath = collectionView.indexPathForCell(cell),
+            calculatedHeight = cell.calculatedHeight
+        {
+            updateCellHeight(indexPath, height: calculatedHeight)
         }
     }
 
@@ -315,17 +323,8 @@ public final class StreamViewController: BaseElloViewController {
                 success: { (jsonables, responseConfig) in
                     guard self.isValidInitialPageLoadingToken(localToken) else { return }
 
-                    self.clearForInitialLoad()
                     self.responseConfig = responseConfig
-                    self.currentJSONables = jsonables
-
-                    let items = self.generateStreamCellItems(jsonables)
-                    self.appendUnsizedCellItems(items, withWidth: nil, completion: { indexPaths in
-                        if self.streamKind.gridViewPreferenceSet {
-                            self.collectionView.layoutIfNeeded()
-                            self.collectionView.setContentOffset(self.streamKind.gridPreferenceSetOffset, animated: false)
-                        }
-                    })
+                    self.showInitialJSONAbles(jsonables)
                 }, failure: { (error, statusCode) in
                     print("failed to load \(self.streamKind.cacheKey) stream (reason: \(error))")
                     self.initialLoadFailure()
@@ -342,6 +341,21 @@ public final class StreamViewController: BaseElloViewController {
                     })
                 })
         }
+    }
+
+    /// This method can be called by a `StreamableViewController` if it wants to
+    /// override `loadInitialPage`, but doesn't need to customize the cell generation.
+    public func showInitialJSONAbles(jsonables: [JSONAble]) {
+        self.clearForInitialLoad()
+        self.currentJSONables = jsonables
+
+        let items = self.generateStreamCellItems(jsonables)
+        self.appendUnsizedCellItems(items, withWidth: nil, completion: { indexPaths in
+            if self.streamKind.gridViewPreferenceSet {
+                self.collectionView.layoutIfNeeded()
+                self.collectionView.setContentOffset(self.streamKind.gridPreferenceSetOffset, animated: false)
+            }
+        })
     }
 
     private func generateStreamCellItems(jsonables: [JSONAble]) -> [StreamCellItem] {
@@ -437,7 +451,11 @@ public final class StreamViewController: BaseElloViewController {
         rotationNotification = NotificationObserver(notification: Application.Notifications.DidChangeStatusBarOrientation) { [unowned self] _ in
             self.collectionView.reloadData()
         }
-        sizeChangedNotification = NotificationObserver(notification: Application.Notifications.ViewSizeDidChange) { [unowned self] _ in
+        sizeChangedNotification = NotificationObserver(notification: Application.Notifications.ViewSizeWillChange) { [unowned self] size in
+            if let layout = self.collectionView.collectionViewLayout as? StreamCollectionViewLayout {
+                layout.columnCount = self.streamKind.columnCountFor(width: size.width)
+                layout.invalidateLayout()
+            }
             self.collectionView.reloadData()
         }
 
@@ -522,7 +540,7 @@ public final class StreamViewController: BaseElloViewController {
     }
 
     private func updateCellHeight(indexPath: NSIndexPath, height: CGFloat) {
-        let existingHeight = dataSource.heightForIndexPath(indexPath, numberOfColumns: streamKind.columnCount)
+        let existingHeight = dataSource.heightForIndexPath(indexPath, numberOfColumns: columnCount)
         if height != existingHeight {
             collectionView.performBatchUpdates({
                 self.dataSource.updateHeightForIndexPath(indexPath, height: height)
@@ -545,7 +563,7 @@ public final class StreamViewController: BaseElloViewController {
     // this gets reset whenever the streamKind changes
     private func setupCollectionViewLayout() {
         if let layout = collectionView.collectionViewLayout as? StreamCollectionViewLayout {
-            layout.columnCount = streamKind.columnCount
+            layout.columnCount = streamKind.columnCountFor(width: view.frame.width)
             layout.sectionInset = UIEdgeInsetsZero
             layout.minimumColumnSpacing = streamKind.columnSpacing
             layout.minimumInteritemSpacing = 0
@@ -722,7 +740,9 @@ extension StreamViewController: StreamCollectionViewLayoutDelegate {
     public func collectionView(collectionView: UICollectionView,
         layout collectionViewLayout: UICollectionViewLayout,
         sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
-            return CGSize(width: UIWindow.windowWidth(), height: dataSource.heightForIndexPath(indexPath, numberOfColumns: 1))
+            let width = calculateColumnWidth(screenWidth: UIWindow.windowWidth(), columnCount: columnCount)
+            let height = dataSource.heightForIndexPath(indexPath, numberOfColumns: 1)
+            return CGSize(width: width, height: height)
     }
 
     public func collectionView(collectionView: UICollectionView,

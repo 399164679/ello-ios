@@ -14,7 +14,12 @@ public class CategoryList: JSONAble {
     public let categories: [Category]
 
     public init(categories: [Category]) {
-        self.categories = categories.sort { $0.order < $1.order }
+        self.categories = categories.sort { (catA, catB) in
+            if catA.level.order != catB.level.order {
+                return catA.level.order < catB.level.order
+            }
+            return catA.order < catB.order
+        }
         super.init(version: CategoryListVersion)
     }
 

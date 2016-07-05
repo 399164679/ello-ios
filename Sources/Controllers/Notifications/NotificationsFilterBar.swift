@@ -21,9 +21,7 @@ public class NotificationsFilterBar: UIView {
         super.init(frame: frame)
         backgroundColor = .whiteColor()
 
-        let blackBar = UIView(frame: CGRect(x: 0, y: 0, width: frame.width, height: 20))
-        blackBar.autoresizingMask = [.FlexibleWidth, .FlexibleBottomMargin]
-        blackBar.backgroundColor = .blackColor()
+        let blackBar = BlackBar(frame: CGRect(x: 0, y: 0, width: frame.width, height: 20))
         self.addSubview(blackBar)
     }
 

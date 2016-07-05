@@ -11,15 +11,16 @@ import SwiftyJSON
 public let CategoryVersion = 1
 
 public final class Category: JSONAble, Groupable {
-    static let featured = Category(id: "meta1", name: InterfaceString.Discover.Featured, slug: "recommended", order: 0, level: .Meta)
-    static let trending = Category(id: "meta2", name: InterfaceString.Discover.Trending, slug: "trending", order: 1, level: .Meta)
-    static let recent = Category(id: "meta3", name: InterfaceString.Discover.Recent, slug: "recent", order: 2, level: .Meta)
+    static let featured = Category(id: "meta1", name: InterfaceString.Discover.Featured, slug: "recommended", order: 0, level: .Meta, tileImage: nil)
+    static let trending = Category(id: "meta2", name: InterfaceString.Discover.Trending, slug: "trending", order: 1, level: .Meta, tileImage: nil)
+    static let recent = Category(id: "meta3", name: InterfaceString.Discover.Recent, slug: "recent", order: 2, level: .Meta, tileImage: nil)
 
     public let id: String
     public var groupId: String { return id }
     public let name: String
     public let slug: String
-    public var cardURL: NSURL? { return nil }
+    public var tileURL: NSURL? { return tileImage?.url }
+    public let tileImage: Attachment?
     public let order: Int
     public let level: CategoryLevel
     public var endpoint: ElloAPI {
@@ -29,17 +30,23 @@ public final class Category: JSONAble, Groupable {
         }
     }
 
+    var visibleOnSeeMore: Bool {
+        return level == .Primary || level == .Secondary
+    }
+
     public init(id: String,
         name: String,
         slug: String,
         order: Int,
-        level: CategoryLevel)
+        level: CategoryLevel,
+        tileImage: Attachment?)
     {
         self.id = id
         self.name = name
         self.slug = slug
         self.order = order
         self.level = level
+        self.tileImage = tileImage
         super.init(version: CategoryVersion)
     }
 
@@ -50,6 +57,7 @@ public final class Category: JSONAble, Groupable {
         slug = decoder.decodeKey("slug")
         order = decoder.decodeKey("order")
         level = CategoryLevel(rawValue: decoder.decodeKey("level"))!
+        tileImage = decoder.decodeKey("tileImage")
         super.init(coder: coder)
     }
 
@@ -60,6 +68,7 @@ public final class Category: JSONAble, Groupable {
         encoder.encodeObject(slug, forKey: "slug")
         encoder.encodeObject(order, forKey: "order")
         encoder.encodeObject(level.rawValue, forKey: "level")
+        encoder.encodeObject(tileImage, forKey: "tileImage")
         super.encodeWithCoder(coder)
     }
 
@@ -70,7 +79,16 @@ public final class Category: JSONAble, Groupable {
         let slug = json["slug"].stringValue
         let order = json["order"].intValue
         let level: CategoryLevel = CategoryLevel(rawValue: json["level"].stringValue) ?? .Tertiary
-        return Category(id: id, name: name, slug: slug, order: order, level: level)
+        let tileImage: Attachment?
+        if let assetJson = json["tile_image"].object as? [String: AnyObject],
+            attachmentJson = assetJson["large"] as? [String: AnyObject]
+        {
+            tileImage = Attachment.fromJSON(attachmentJson) as? Attachment
+        }
+        else {
+            tileImage = nil
+        }
+        return Category(id: id, name: name, slug: slug, order: order, level: level, tileImage: tileImage)
     }
 
 }

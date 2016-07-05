@@ -18,8 +18,14 @@ public struct CategoryCardCellPresenter {
         if let cell = cell as? CategoryCardCell,
             category = streamCellItem.jsonable as? Category
         {
+            let desiredHeight: CGFloat = ceil(cell.frame.width / 1.5)
+            if streamCellItem.calculatedOneColumnCellHeight != desiredHeight || streamCellItem.calculatedMultiColumnCellHeight != desiredHeight {
+                streamCellItem.calculatedOneColumnCellHeight = desiredHeight
+                streamCellItem.calculatedMultiColumnCellHeight = desiredHeight
+                postNotification(StreamNotification.UpdateCellHeightNotification, value: cell)
+            }
             cell.title = category.name
-            cell.imageURL = category.cardURL
+            cell.imageURL = category.tileURL
         }
     }
 

@@ -44,16 +44,16 @@ public class DiscoverViewController: StreamableViewController {
 
         addSearchButton()
 
-        ElloProvider.shared.elloRequest(.Categories) { [weak self] (data, responseConfig) in
-            if let categories = data as? [Category], sself = self {
-                let categoriesPlusFeatured = [Category.featured] + categories
-                let categoryList = CategoryList(categories: categoriesPlusFeatured)
-                sself.categoryList = categoryList
-                sself.streamViewController.replacePlaceholder(.CategoryList, with: [
-                    StreamCellItem(jsonable: categoryList, type: .CategoryList),
-                ])
-            }
-        }
+        CategoryService().loadCategories({ [weak self] categories in
+            guard let sself = self else { return }
+
+            let categoriesPlusFeatured = [Category.featured] + categories
+            let categoryList = CategoryList(categories: categoriesPlusFeatured)
+            sself.categoryList = categoryList
+            sself.streamViewController.replacePlaceholder(.CategoryList, with: [
+                StreamCellItem(jsonable: categoryList, type: .CategoryList),
+            ])
+        })
     }
 
     required public init?(coder aDecoder: NSCoder) {

@@ -29,3 +29,8 @@ public class Tracker {
     func createdAtCrash(identifier: String, json: String?) {}
     func encounteredNetworkError(path: String, error: NSError, statusCode: Int?) {}
 }
+
+public class Window {
+    static public func isWide(width: Float) -> Bool { return false }
+    static public var width: Float { return 0 }
+}
